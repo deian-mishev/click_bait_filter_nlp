@@ -1,0 +1,10 @@
+{
+  "db": {
+    "windowsAuthentication": true,
+    "server": "127.0.0.1",
+	"port": "1433",
+    "database": "ccms_back_db"
+  },
+  "address": "localhost",
+  "port": 3002
+}

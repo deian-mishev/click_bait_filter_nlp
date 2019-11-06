@@ -1,0 +1,37 @@
+#Configuration
+Configuration:
+  name: Default
+  #Properties
+  Properties:
+    Property: 
+      - name: logsFolder
+        value: "logs" 
+      - name: log-pattern
+        value: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+      - name: logFileMaxSize
+        value: "300 MB"
+  #Appenders
+  Appenders:
+    Console:
+      name: Console_Appender
+      target: SYSTEM_OUT
+      PatternLayout: 
+        pattern: ${log-pattern} 
+    RollingFile: 
+      name: RollingFile_Appender
+      fileName: "${sys:logsFolder}/ccms-db-error.log"
+      filePattern: "${sys:logsFolder}/$${date:MM-yyyy}/ccms-db-%d{dd-MM-yyyy}-%i.log.gz"
+      PatternLayout: 
+        Pattern: ${log-pattern} 
+      policies: 
+        SizeBasedTriggeringPolicy:
+          size: ${sys:logFileMaxSize}
+  #Loggers
+  Loggers:
+    Root:
+      level: trace
+      AppenderRef: 
+        - ref: Console_Appender
+          level: info
+        - ref: RollingFile_Appender
+          level: error
