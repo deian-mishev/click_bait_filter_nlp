@@ -43,7 +43,7 @@ out_data_negative = strToSetIndex(
 # Mixing
 train_data = np.concatenate((
     out_data_positive, out_data_negative))
-np.random.seed(1)
+np.random.seed(0)
 np.random.shuffle(train_data)
 
 train_labels = np.concatenate((
