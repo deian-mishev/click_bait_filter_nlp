@@ -1,4 +1,5 @@
 ### Gradle ###
+data.json
 .gradle
 /build/
 /venv/

@@ -1,81 +1,108 @@
-
-import matplotlib.pyplot as plt
-import numpy as np
-from keras.datasets import mnist
-from keras.utils import to_categorical
-from keras.models import load_model
-
 from keras import models
 from keras import layers
-from random import randint
-(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
-
-network = models.Sequential()
-network.add(layers.Dense(512, activation='relu', input_shape=(28 * 28,)))
-network.add(layers.Dense(10, activation='softmax'))
-network.compile(optimizer='rmsprop', loss='categorical_crossentropy',
-                metrics=['accuracy'])
-
-train_images = train_images.reshape((60000, 28 * 28))
-train_images = train_images.astype('float32') / 255
-
-val_images = test_images
-# test_images = test_images.reshape((10000, 28 * 28))
-# test_images = test_images.astype('float32') / 255
-
-# train_labels = to_categorical(train_labels)
-# test_labels = to_categorical(test_labels)
-
-# network.fit(train_images, train_labels, epochs=10, batch_size=128)
-# Export the model to a SavedModel
-# network.save('./mnimist_model')
+from keras import optimizers
+import matplotlib.pyplot as plt
+import numpy as np
+import json
 
 
-# Recreate the exact same model
-new_model = load_model('./mnimist_model')
+def vectorize_sequences(sequences, dimension=10000):
+    results = np.zeros((len(sequences), dimension))
+    for i, sequence in enumerate(sequences):
+        results[i, sequence] = 1.
+    return results
 
-# Check that the state is preserved
-for x in np.random.randint(6000, size=10):
-    digit = val_images[x]
-    plt.imshow(digit, cmap=plt.cm.binary)
-    plt.show()
 
-    digit = digit.reshape(1, 28 * 28)
-    digit = digit.astype('float32') / 255
+def fillSet(unique, filename):
+    with open(filename) as json_file:
+        data = np.array(json.load(json_file))
+        temp = np.unique(np.concatenate(data))
+        unique = np.concatenate([temp, unique])
+        return data, np.unique(unique)
 
-    new_predictions = new_model.predict(digit)
-    print(new_predictions)
-    pass
 
-# Regression Example With Boston Dataset: Standardized and Wider
-# from pandas import read_csv
-# from keras.models import Sequential
-# from keras.layers import Dense
-# from keras.wrappers.scikit_learn import KerasRegressor
-# from sklearn.model_selection import cross_val_score
-# from sklearn.model_selection import KFold
-# from sklearn.preprocessing import StandardScaler
-# from sklearn.pipeline import Pipeline
-# # load dataset
-# dataframe = read_csv("housing.data.txt", delim_whitespace=True, header=None)
-# dataset = dataframe.values
-# # split into input (X) and output (Y) variables
-# X = dataset[:,0:13]
-# Y = dataset[:,13]
-# # define wider model
-# def wider_model():
-# 	# create model
-# 	model = Sequential()
-# 	model.add(Dense(20, input_dim=13, kernel_initializer='normal', activation='relu'))
-# 	model.add(Dense(1, kernel_initializer='normal'))
-# 	# Compile model
-# 	model.compile(loss='mean_squared_error', optimizer='adam')
-# 	return model
-# # evaluate model with standardized dataset
-# estimators = []
-# estimators.append(('standardize', StandardScaler()))
-# estimators.append(('mlp', KerasRegressor(build_fn=wider_model, epochs=100, batch_size=5, verbose=0)))
-# pipeline = Pipeline(estimators)
-# kfold = KFold(n_splits=10)
-# results = cross_val_score(pipeline, X, Y, cv=kfold)
-# print("Wider: %.2f (%.2f) MSE" % (results.mean(), results.std()))
+def strToSetIndex(out_data_set, out_data):
+    return np.array([[out_data_set[inel] for inel in el]
+                     for el in out_data])
+
+
+# Fetching Data and indexes
+out_data_set = np.array([])
+out_data_positive_raw, out_data_set = fillSet(
+    out_data_set, 'out_data_positive.json')
+out_data_negative_raw, out_data_set = fillSet(
+    out_data_set, 'out_data_negative.json')
+out_data_set = {out_data_set[i]: i for i in range(0, len(out_data_set))}
+
+# To indexes
+out_data_positive = strToSetIndex(
+    out_data_set, out_data_positive_raw)
+out_data_negative = strToSetIndex(
+    out_data_set, out_data_negative_raw)
+
+# Mixing
+train_data = np.concatenate((
+    out_data_positive, out_data_negative))
+np.random.seed(1)
+np.random.shuffle(train_data)
+
+train_labels = np.concatenate((
+    np.zeros(len(out_data_positive)),
+    np.ones(len(out_data_negative))), axis=0)
+np.random.seed(0)
+np.random.shuffle(train_labels)
+
+# Vectorizing
+x_train = vectorize_sequences(train_data)
+y_train = np.asarray(train_labels).astype('float32')
+
+# Living training samples
+aside = 100
+x_val = x_train[:aside]
+partial_x_train = x_train[aside:]
+y_val = y_train[:aside]
+partial_y_train = y_train[aside:]
+
+# Model
+model = models.Sequential()
+model.add(layers.Dense(16, activation='relu', input_shape=(10000,)))
+model.add(layers.Dense(16, activation='relu'))
+model.add(layers.Dense(1, activation='sigmoid'))
+model.compile(optimizer='rmsprop', loss='binary_crossentropy',
+              metrics=['acc'])
+
+
+history = model.fit(partial_x_train, partial_y_train,
+                    epochs=12,
+                    batch_size=100,
+                    validation_data=(x_val, y_val))
+
+# Plotting the loss
+history_dict = history.history
+
+acc_values = history_dict['acc']
+val_acc_values = history_dict['val_acc']
+loss_values = history_dict['loss']
+val_loss_values = history_dict['val_loss']
+
+epochs = range(1, len(acc_values) + 1)
+
+plt.plot(epochs, loss_values, 'bo', label='Training loss')
+plt.plot(epochs, val_loss_values, 'b', label='Validation loss')
+
+plt.title('Training and validation loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+plt.clf()
+acc_values = history_dict['acc']
+val_acc_values = history_dict['val_acc']
+plt.plot(epochs, acc_values, 'bo', label='Training acc')
+plt.plot(epochs, val_acc_values, 'b', label='Validation acc')
+plt.title('Training and validation accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
