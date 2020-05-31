@@ -16,7 +16,7 @@ var entries = [];
         var found = a.url.match(/\/(?=[^/]*$)(.*?)(\.|\?|$)/);
         if(found) {
             var el = found[1].split('-').filter(Boolean);
-            if(el.length > 3) { 
+            if(el.length > 2) { 
                 entries.push(el);
             }
         }
