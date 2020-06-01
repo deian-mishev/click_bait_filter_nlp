@@ -1,7 +1,9 @@
+!.gitkeep
 ### Gradle ###
 data.json
 .gradle
 /build/
+/model/
 /venv/
 # Ignore Gradle GUI config
 gradle-app.setting
