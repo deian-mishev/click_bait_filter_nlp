@@ -8,7 +8,7 @@ mongoexport \
     --pretty \
     --query '{"links": { "$ne": null }}'
 
-node > src/out_data_positive.json << EOF
+node > data/out_data_positive.json << EOF
 var data = require('./data.json');
 var letters = /^[a-z]+$/;
 var link = /\/(?=[^/]*$)(.*?)(\.|\?|$)/;
@@ -38,7 +38,7 @@ mongoexport \
     --pretty \
     --query '{"links": { "$ne": null }}'
 
-node > src/out_data_negative.json << EOF
+node > data/out_data_negative.json << EOF
 var data = require('./data.json');
 var letters = /^[a-z]+$/;
 var link = /\/(?=[^/]*$)(.*?)(\.|\?|$)/;

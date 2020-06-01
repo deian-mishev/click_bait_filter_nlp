@@ -4,6 +4,8 @@ data.json
 .gradle
 /build/
 /model/
+/data/
+/checkpoints/
 /venv/
 # Ignore Gradle GUI config
 gradle-app.setting

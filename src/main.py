@@ -129,9 +129,9 @@ def strToSetIndex(out_data_set, out_data):
 # Fetching Data and indexes
 out_data_set = np.array([])
 out_data_positive_raw, out_data_set = fillSet(
-    out_data_set, 'out_data_positive.json')
+    out_data_set, '../data/out_data_positive.json')
 out_data_negative_raw, out_data_set = fillSet(
-    out_data_set, 'out_data_negative.json')
+    out_data_set, '../data/out_data_negative.json')
 out_data_set = {out_data_set[i]: i for i in range(0, len(out_data_set))}
 
 # To indexes
