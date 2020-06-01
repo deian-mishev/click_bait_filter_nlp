@@ -1,58 +1,24 @@
 #!/bin/sh
 mongoexport \
     --host localhost \
-    --db click_bait_db \
+    --db temp \
     --collection datamodels \
     --out data.json \
     --jsonArray \
     --pretty \
     --query '{"links": { "$ne": null }}'
 
-node > data/out_data_positive.json << EOF
-var data = require('./data.json');
-var letters = /^[a-z]+$/;
-var link = /\/(?=[^/]*$)(.*?)(\.|\?|$)/;
-var entries = [];
+node > data/temp.json << EOF
+const data = require('./data.json');
+const { getUrl } 
+    = require('../click_bait_filter_be/api/url_get');
+
+const entries = [];
 data.forEach(a => {
     a.links.forEach(a => {
-        var found = a.url.match(link);
-        if(found) {
-            var el = found[1].split('-')
-                .filter(Boolean)
-                .filter(a => a.match(letters))
-            if(el.length >= 2) { 
-                entries.push(el);
-            }
-        }
-    });
-});
-console.log(JSON.stringify(entries));
-EOF
-
-mongoexport \
-    --host localhost \
-    --db click_bait_db_negative \
-    --collection datamodels \
-    --out data.json \
-    --jsonArray \
-    --pretty \
-    --query '{"links": { "$ne": null }}'
-
-node > data/out_data_negative.json << EOF
-var data = require('./data.json');
-var letters = /^[a-z]+$/;
-var link = /\/(?=[^/]*$)(.*?)(\.|\?|$)/;
-var entries = [];
-data.forEach(a => {
-    a.links.forEach(a => {
-        var found = a.url.match(link);
-        if(found) {
-            var el = found[1].split('-')
-                .filter(Boolean)
-                .filter(a => a.match(letters))
-            if(el.length >= 2) { 
-                entries.push(el);
-            }
+        const el = getUrl(a.url);
+        if (el) {
+            entries.push(el);
         }
     });
 });
