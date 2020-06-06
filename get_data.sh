@@ -1,14 +1,14 @@
 #!/bin/sh
 mongoexport \
     --host localhost \
-    --db temp \
+    --db $1 \
     --collection datamodels \
     --out data.json \
     --jsonArray \
     --pretty \
     --query '{"links": { "$ne": null }}'
 
-node > data/temp.json << EOF
+node > data/$1.json << EOF
 const data = require('./data.json');
 const { getUrl } 
     = require('../click_bait_filter_be/api/url_get');

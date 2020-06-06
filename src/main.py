@@ -1,4 +1,3 @@
-
 from keras import optimizers
 from keras import layers
 from keras import models
@@ -6,6 +5,7 @@ from keras import callbacks
 import tensorflowjs as tfjs
 
 import matplotlib.pyplot as plt
+import subprocess
 import numpy as np
 import json
 import os
@@ -126,12 +126,17 @@ def strToSetIndex(out_data_set, out_data):
                      for el in out_data])
 
 
+# Exporting data
+process = subprocess.run(['./get_data.sh', 'click_bait_db'], cwd=r'./../')
+process = subprocess.run(
+    ['./get_data.sh', 'click_bait_db_negative'], cwd=r'./../')
+
 # Fetching Data and indexes
 out_data_set = np.array([])
 out_data_positive_raw, out_data_set = fillSet(
-    out_data_set, '../data/out_data_positive.json')
+    out_data_set, '../data/click_bait_db.json')
 out_data_negative_raw, out_data_set = fillSet(
-    out_data_set, '../data/out_data_negative.json')
+    out_data_set, '../data/click_bait_db_negative.json')
 out_data_set = {out_data_set[i]: i for i in range(0, len(out_data_set))}
 
 # To indexes
