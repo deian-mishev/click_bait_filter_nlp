@@ -18,7 +18,7 @@ with open('../public/not_found.html', 'r') as myfile:
     HTML_NOT_FOUND = myfile.read()
     myfile.close()
 
-# Because the class gets destroyed
+
 PROCESSED_EL = ''
 
 
@@ -79,5 +79,6 @@ class MyHttpRequestHandler(SimpleHTTPRequestHandler):
         self.do_GET()
 
 
-httpd = HTTPServer(('localhost', 8000), MyHttpRequestHandler)
+httpd = HTTPServer(
+    ('localhost', int(os.environ['PORT'])), MyHttpRequestHandler)
 httpd.serve_forever()
