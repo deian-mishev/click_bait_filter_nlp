@@ -1,16 +1,22 @@
-from utils import fillSet, strToSetIndex, \
-    vectorize_sequences, save_checkpoints, \
-    save_model, plot_results, validated_rand
+from utils import fillSet, strToSetIndex, vectorize_sequences
+from model import save_checkpoints, save_model
+from validate import validated_rand, plot_results
+from db import remove_db_duplicates
 
 from keras import layers
 from keras import models
 import subprocess
 import numpy as np
+import os
+
+# REMOVING DB DUPLICATES
+remove_db_duplicates()
 
 # Exporting data
-process = subprocess.run(['./get_data.sh', 'click_bait_db'], cwd=r'./../')
 process = subprocess.run(
-    ['./get_data.sh', 'click_bait_db_negative'], cwd=r'./../')
+    ['./get_data.sh', os.environ['MONGODB_POSITIVE']], cwd=r'./../')
+process = subprocess.run(
+    ['./get_data.sh', os.environ['MONGODB_NEGATIVE']], cwd=r'./../')
 
 # Fetching Data and indexes
 out_data_set = np.array([])
@@ -75,10 +81,10 @@ history = model.fit(partial_x_train, partial_y_train,
                     # validation_data=(x_val, y_val),
                     callbacks=save_checkpoints(False))
 
+# VALIDATIONS
 # print('--------------------------')
 # print(model.evaluate(x_val, y_val))
 # print('--------------------------')
-
 # plot_results(history)
 # validated_rand(model, out_data_set, x_val, train_labels)
 

@@ -1,23 +1,14 @@
-from pymongo import MongoClient
-
-from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
-from io import BytesIO
-import socketserver
 import os
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+from utils import response_html
+from db import get_model_dbs, get_runtime_db
 
 # DB
-CLIENT = MongoClient('mongodb://127.0.0.1')
-MONGODB_RUNTIME = CLIENT[os.environ['MONGODB_RUNTIME']].datamodels
-MONGODB_POSITIVE = CLIENT[os.environ['MONGODB_POSITIVE']].datamodels
-MONGODB_NEGATIVE = CLIENT[os.environ['MONGODB_NEGATIVE']].datamodels
+MONGODB_RUNTIME = get_runtime_db()
+MONGODB_POSITIVE, MONGODB_NEGATIVE = get_model_dbs()
 
-with open('../public/found.html', 'r') as myfile:
-    HTML_FOUND = myfile.read()
-    myfile.close()
-with open('../public/not_found.html', 'r') as myfile:
-    HTML_NOT_FOUND = myfile.read()
-    myfile.close()
-
+# HTML
+HTML_FOUND, HTML_NOT_FOUND = response_html()
 
 PROCESSED_EL = ''
 
@@ -48,7 +39,10 @@ class MyHttpRequestHandler(SimpleHTTPRequestHandler):
             global PROCESSED_EL
             PROCESSED_EL = el
             PROCESSED_EL['domain'] = src[0]['domain']
-        else:
+        elif (src[0] and 'domain' in src[0]):
+            MONGODB_RUNTIME.mycol.delete_one({
+                'domain': src[0]['domain']
+            })
             html = HTML_NOT_FOUND
 
         self.wfile.write(bytes(html, "utf8"))
@@ -60,18 +54,19 @@ class MyHttpRequestHandler(SimpleHTTPRequestHandler):
             "utf-8").replace('action=', '')
         global PROCESSED_EL
         domain = PROCESSED_EL['domain']
-        if body == 'ClickBait':
-            del PROCESSED_EL['domain']
+        del PROCESSED_EL['domain']
+        del PROCESSED_EL['tf_score']
+
+        if body == 'CLICKBAIT':
             MONGODB_POSITIVE.update(
                 {'domain': domain},
-                {'$push': {"links": PROCESSED_EL}},
+                {'$addToSet': {"links": PROCESSED_EL}},
                 upsert=True
             )
-        elif body == 'Not+ClickBait':
-            del PROCESSED_EL['domain']
+        elif body == 'NOTCLICKBAIT':
             MONGODB_NEGATIVE.update(
                 {'domain': domain},
-                {'$push': {"links": PROCESSED_EL}},
+                {'$addToSet': {"links": PROCESSED_EL}},
                 upsert=True
             )
         MONGODB_RUNTIME.update_one(
