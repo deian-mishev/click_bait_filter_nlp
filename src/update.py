@@ -1,4 +1,5 @@
 import os
+import random
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from utils import response_html
 from db import get_model_dbs, get_runtime_db
@@ -31,18 +32,22 @@ class MyHttpRequestHandler(SimpleHTTPRequestHandler):
             }
         ]))
 
-        if (src[0] and 'first' in src[0]):
-            el = src[0]['first']
-            html = HTML_FOUND.format(
-                src=el['url'], tf_score=el['tf_score'])
+        if (len(src) > 0):
+            randDomainInt = random.randint(0, len(src) - 1)
+            if ('first' in src[randDomainInt]):
+                el = src[randDomainInt]['first']
+                html = HTML_FOUND.format(
+                    src=el['url'], tf_score=el['tf_score'])
 
-            global PROCESSED_EL
-            PROCESSED_EL = el
-            PROCESSED_EL['domain'] = src[0]['domain']
-        elif (src[0] and 'domain' in src[0]):
-            MONGODB_RUNTIME.mycol.delete_one({
-                'domain': src[0]['domain']
-            })
+                global PROCESSED_EL
+                PROCESSED_EL = el
+                PROCESSED_EL['domain'] = src[randDomainInt]['domain']
+            else:
+                MONGODB_RUNTIME.delete_one({
+                    'domain': src[0]['domain']
+                })
+                html = HTML_NOT_FOUND
+        else:
             html = HTML_NOT_FOUND
 
         self.wfile.write(bytes(html, "utf8"))
