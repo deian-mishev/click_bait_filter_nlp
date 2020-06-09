@@ -4,6 +4,7 @@
 /checkpoints/*
 
 !.gitkeep
+.vscode/
 
 ### PY Env ###
 /venv/

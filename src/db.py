@@ -1,7 +1,7 @@
 import os
 
 from pymongo import MongoClient
-CLIENT = MongoClient('mongodb://127.0.0.1')
+CLIENT = MongoClient(os.environ['MONGO_CLIENT'])
 
 
 def remove_db_duplicates():
