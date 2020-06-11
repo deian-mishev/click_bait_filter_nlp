@@ -68,7 +68,7 @@ y_val = y_train[:aside]
 
 # Model
 model = models.Sequential()
-model.add(layers.Dense(16, activation='relu', input_shape=(3500,)))
+model.add(layers.Dense(16, activation='relu', input_shape=(5000,)))
 model.add(layers.Dense(32, activation='relu'))
 model.add(layers.Dense(16, activation='relu'))
 model.add(layers.Dense(1, activation='sigmoid'))

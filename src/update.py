@@ -2,7 +2,7 @@ import os
 import random
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from utils import response_html
-from db import get_model_dbs, get_runtime_db
+from db import get_model_dbs, get_runtime_db, findLink
 
 # DB
 MONGODB_RUNTIME = get_runtime_db()
@@ -17,10 +17,6 @@ PROCESSED_EL = ''
 class MyHttpRequestHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-
-        self.end_headers()
 
         src = list(MONGODB_RUNTIME.aggregate([
             {
@@ -36,20 +32,38 @@ class MyHttpRequestHandler(SimpleHTTPRequestHandler):
             randDomainInt = random.randint(0, len(src) - 1)
             if ('first' in src[randDomainInt]):
                 el = src[randDomainInt]['first']
-                html = HTML_FOUND.format(
-                    src=el['url'], tf_score=el['tf_score'])
+                domain = src[randDomainInt]['domain']
+                url = el['url']
 
-                global PROCESSED_EL
-                PROCESSED_EL = el
-                PROCESSED_EL['domain'] = src[randDomainInt]['domain']
+                in_positive = findLink(
+                    MONGODB_POSITIVE, domain, url)
+                in_negative = findLink(
+                    MONGODB_NEGATIVE, domain, url)
+                if not in_positive and not in_negative:
+                    html = HTML_FOUND.format(
+                        src=url, tf_score=el['tf_score'])
+
+                    global PROCESSED_EL
+                    PROCESSED_EL = el
+                    PROCESSED_EL['domain'] = domain
+                else:
+                    MONGODB_RUNTIME.update_one(
+                        {'domain': domain}, {'$pull': {'links': {'url': url}}})
+                    self.do_GET()
+                    return
+
             else:
                 MONGODB_RUNTIME.delete_one({
-                    'domain': src[0]['domain']
+                    'domain': src[randDomainInt]['domain']
                 })
-                html = HTML_NOT_FOUND
+                self.do_GET()
+                return
         else:
             html = HTML_NOT_FOUND
 
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
         self.wfile.write(bytes(html, "utf8"))
         return
 
