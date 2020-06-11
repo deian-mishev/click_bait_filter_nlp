@@ -4,7 +4,7 @@
 
 ## Description
 
-This application is a part of a group of services who plot to rid the web of clickbait by relying on user input and machine learnig. The completed application functions by storing it’s user clicked items and using them to disseminate what is clickbait and what is legitimate news, stories, etc. This is done in conjunction with a machine learning classificator. The full application functions on all sites and thus can allow you to be more productive while browsing the web. It functions by providing the user with a slider giving him possibility to filter content, deemed clickbait and at the same time highlight content that is deemed not. In addition it can show it’s user a topology of the most clickbaity content of each domain.
+This application is a part of a group of services who plot to rid the web of clickbait by relying on user input and machine learnig. The completed application functions by storing it’s user clicked items and using them to disseminate what is clickbait and what is legitimate news, stories, etc. This is done in conjunction with a machine learning classificator. The full application functions on all sites and thus can allow you to be more productive while browsing the web. This happens by providing you user with a slider giving him possibility to filter content, deemed clickbait and at the same time highlight content that is deemed not. In addition it can show it’s user the topology of the most clickbaity content of each domain.
 </br>
 </br>
 This service is a Tensorflow Model generator and DB Source Updater. For more info visit the application [CLICKBAIT-PORTAL] and download the build of this plugin from the [CHROME-STORE].
