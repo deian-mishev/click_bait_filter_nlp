@@ -21,7 +21,7 @@ def un_vectorize_sequences(sequences):
     return results
 
 
-def vectorize_sequences(sequences, dimension=5000):
+def vectorize_sequences(sequences, dimension):
     results = np.zeros((len(sequences), dimension))
     for i, sequence in enumerate(sequences):
         results[i, sequence] = 1.

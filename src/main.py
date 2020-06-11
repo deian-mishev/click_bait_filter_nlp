@@ -9,6 +9,7 @@ import subprocess
 import numpy as np
 import os
 
+modelWordsNumber = 5000
 # REMOVING DB DUPLICATES
 remove_db_duplicates()
 
@@ -54,7 +55,7 @@ np.random.seed(seedInt)
 np.random.shuffle(train_labels)
 
 # Vectorizing Data and Labels
-x_train = vectorize_sequences(train_data)
+x_train = vectorize_sequences(train_data, modelWordsNumber)
 y_train = np.asarray(train_labels).astype('float32')
 
 # Living training samples
@@ -68,7 +69,7 @@ y_val = y_train[:aside]
 
 # Model
 model = models.Sequential()
-model.add(layers.Dense(16, activation='relu', input_shape=(5000,)))
+model.add(layers.Dense(16, activation='relu', input_shape=(modelWordsNumber,)))
 model.add(layers.Dense(32, activation='relu'))
 model.add(layers.Dense(16, activation='relu'))
 model.add(layers.Dense(1, activation='sigmoid'))
@@ -76,7 +77,7 @@ model.compile(optimizer='rmsprop', loss='binary_crossentropy',
               metrics=['acc'])
 
 history = model.fit(partial_x_train, partial_y_train,
-                    epochs=10,
+                    epochs=11,
                     batch_size=100,
                     # validation_data=(x_val, y_val),
                     callbacks=save_checkpoints(False))
