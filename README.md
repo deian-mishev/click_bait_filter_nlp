@@ -134,7 +134,12 @@ This builds the model and exports the result as well as the word indexing (neede
 
 ### Todos
 
- - Tests and Docs
+Model Consider with:
+
+- K-Fold Cross Validation
+- K-Fold Validation With Shuffeling
+- Mini Batcht Tests
+
 
   [PY-MONGO]: <https://github.com/mher/pymongo>
   [KERAS]: <https://github.com/keras-team/keras>

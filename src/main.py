@@ -1,10 +1,11 @@
 from utils import fillSet, strToSetIndex, vectorize_sequences
-from model import save_checkpoints, save_model
-from validate import validated_rand, plot_results
+from model import save_model, teach_model_k_fold, teach_model_hold_out
+from validate import validated_rand, plot_hold_out_res, plot_k_fold_res
 from db import remove_db_duplicates
 
 from keras import layers
 from keras import models
+from keras import regularizers
 import subprocess
 import numpy as np
 import os
@@ -25,7 +26,7 @@ out_data_positive_raw, out_data_set = fillSet(
     out_data_set, '../data/click_bait_db.json')
 out_data_negative_raw, out_data_set = fillSet(
     out_data_set, '../data/click_bait_db_negative.json')
-out_data_set = {out_data_set[i]: i for i in range(0, len(out_data_set))}
+out_data_set = {out_data_set[i]: i + 1 for i in range(0, len(out_data_set))}
 
 # To indexes
 out_data_positive = strToSetIndex(
@@ -58,35 +59,38 @@ np.random.shuffle(train_labels)
 x_train = vectorize_sequences(train_data, modelWordsNumber)
 y_train = np.asarray(train_labels).astype('float32')
 
-# Living training samples
-aside = 0
-partial_x_train = x_train[aside:]
-partial_y_train = y_train[aside:]
+aside = 10
+partial_x_train = x_train[:aside]
+partial_y_train = y_train[:aside]
 
-x_val = x_train[:aside]
-y_val = y_train[:aside]
+x_train = x_train[aside:]
+y_train = y_train[aside:]
 
 
 # Model
 model = models.Sequential()
-model.add(layers.Dense(16, activation='relu', input_shape=(modelWordsNumber,)))
-model.add(layers.Dense(32, activation='relu'))
-model.add(layers.Dense(16, activation='relu'))
+model.add(layers.Dense(16, kernel_regularizer=regularizers.l2(
+    0.001), activation='relu', input_shape=(modelWordsNumber,)))
+model.add(layers.Dropout(0.2))
+model.add(layers.Dense(
+    32, kernel_regularizer=regularizers.l2(0.001), activation='relu'))
+model.add(layers.Dropout(0.2))
+model.add(layers.Dense(
+    16, kernel_regularizer=regularizers.l2(0.001), activation='relu'))
+model.add(layers.Dropout(0.2))
 model.add(layers.Dense(1, activation='sigmoid'))
 model.compile(optimizer='rmsprop', loss='binary_crossentropy',
               metrics=['acc'])
 
-history = model.fit(partial_x_train, partial_y_train,
-                    epochs=11,
-                    batch_size=100,
-                    # validation_data=(x_val, y_val),
-                    callbacks=save_checkpoints(False))
+# history, model, score = teach_model_k_fold(
+#     model, x_train, y_train, 6, 10, 1)
+# plot_k_fold_res(history)
 
-# VALIDATIONS
-# print('--------------------------')
-# print(model.evaluate(x_val, y_val))
-# print('--------------------------')
-# plot_results(history)
-# validated_rand(model, out_data_set, x_val, train_labels)
+history, model, score = teach_model_hold_out(
+    model, x_train, y_train, 200, 5, 1)
+plot_hold_out_res(history)
+print(score)
 
-save_model(model, out_data_set)
+validated_rand(model, out_data_set, partial_x_train, partial_y_train)
+
+# save_model(model, out_data_set)

@@ -3,7 +3,7 @@ import numpy as np
 from utils import un_vectorize_sequences
 
 
-def validated_rand(model, out_data_set, valSet, train_labels, times=10):
+def validated_rand(model, out_data_set, valSet, train_labels):
     reverse_word_index = dict(
         [(value, key) for (key, value) in out_data_set.items()])
     fig, ax = plt.subplots()
@@ -14,19 +14,18 @@ def validated_rand(model, out_data_set, valSet, train_labels, times=10):
 
     collabel = ("cont", "flag", "res")
     clust_data = np.empty((0, 3), int)
-
+    times = len(train_labels)
     for i in range(times):
-        a = np.random.randint(0, len(valSet))
-        sample = valSet[a]
+        sample = valSet[i]
         decoded_link = ' '.join([reverse_word_index.get(
             i, '?') for i in un_vectorize_sequences(sample)])
 
         clust_data = np.concatenate((clust_data,
                                      [[
                                          decoded_link,
-                                         int(train_labels[a]),
-                                         '{:.2f}'.format(model.predict(
-                                             np.array([valSet[a]]))[0][0])
+                                         int(train_labels[i]),
+                                         '{:.4f}'.format(model.predict(
+                                             np.array([valSet[i]]))[0][0])
                                      ]]))
 
     the_table = ax.table(
@@ -39,7 +38,14 @@ def validated_rand(model, out_data_set, valSet, train_labels, times=10):
     plt.show()
 
 
-def plot_results(history, loss=True, training=True):
+def plot_k_fold_res(history):
+    plt.plot(range(1, len(history) + 1), history)
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.show()
+
+
+def plot_hold_out_res(history, loss=True, training=True):
     history_dict = history.history
 
     acc_values = history_dict['acc']
