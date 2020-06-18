@@ -62,18 +62,15 @@ y_train = np.asarray(train_labels).astype('float32')
 aside = 10
 partial_x_train = x_train[:aside]
 partial_y_train = y_train[:aside]
+train_data = train_data[:aside]
 
 x_train = x_train[aside:]
 y_train = y_train[aside:]
-
 
 # Model
 model = models.Sequential()
 model.add(layers.Dense(16, kernel_regularizer=regularizers.l2(
     0.001), activation='relu', input_shape=(modelWordsNumber,)))
-model.add(layers.Dropout(0.2))
-model.add(layers.Dense(
-    32, kernel_regularizer=regularizers.l2(0.001), activation='relu'))
 model.add(layers.Dropout(0.2))
 model.add(layers.Dense(
     16, kernel_regularizer=regularizers.l2(0.001), activation='relu'))
@@ -82,15 +79,15 @@ model.add(layers.Dense(1, activation='sigmoid'))
 model.compile(optimizer='rmsprop', loss='binary_crossentropy',
               metrics=['acc'])
 
-# history, model, score = teach_model_k_fold(
-#     model, x_train, y_train, 6, 10, 1)
-# plot_k_fold_res(history)
+history, model, score = teach_model_k_fold(
+    model, x_train, y_train, 4, 8, 32)
+plot_k_fold_res(history)
 
-history, model, score = teach_model_hold_out(
-    model, x_train, y_train, 200, 5, 1)
-plot_hold_out_res(history)
+# history, model, score = teach_model_hold_out(
+#     model, x_train, y_train, 100, 8, 32)
+# plot_hold_out_res(history)
 print(score)
 
-validated_rand(model, out_data_set, partial_x_train, partial_y_train)
-
-# save_model(model, out_data_set)
+validated_rand(model, out_data_set, partial_x_train,
+               partial_y_train, train_data)
+save_model(model, out_data_set)

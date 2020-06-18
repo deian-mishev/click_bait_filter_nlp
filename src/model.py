@@ -47,7 +47,7 @@ def teach_model_k_fold(model, x_train, y_train, folds, epochs, batch_size, save_
                             batch_size=batch_size,
                             validation_data=(val_data, val_targets),
                             callbacks=save_checkpoints(save_points),
-                            verbose=0)
+                            verbose=1)
 
         acc_history = history.history['loss']
         all_acc_history.append(acc_history)
@@ -72,6 +72,6 @@ def teach_model_hold_out(model, x_train, y_train, aside, epochs, batch_size, sav
                         batch_size=batch_size,
                         validation_data=(x_val, y_val),
                         callbacks=save_checkpoints(save_points),
-                        verbose=0)
+                        verbose=1)
 
-    return history, model, model.evaluate(x_val, y_val)
+    return history, model, model.evaluate(x_val, y_val, verbose=0)

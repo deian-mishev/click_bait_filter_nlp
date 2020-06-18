@@ -1,9 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from utils import un_vectorize_sequences
 
 
-def validated_rand(model, out_data_set, valSet, train_labels):
+def validated_rand(model, out_data_set, valSet, train_labels, train_data):
     reverse_word_index = dict(
         [(value, key) for (key, value) in out_data_set.items()])
     fig, ax = plt.subplots()
@@ -16,9 +15,8 @@ def validated_rand(model, out_data_set, valSet, train_labels):
     clust_data = np.empty((0, 3), int)
     times = len(train_labels)
     for i in range(times):
-        sample = valSet[i]
         decoded_link = ' '.join([reverse_word_index.get(
-            i, '?') for i in un_vectorize_sequences(sample)])
+            i, '?') for i in train_data[i]])
 
         clust_data = np.concatenate((clust_data,
                                      [[
