@@ -57,6 +57,7 @@ np.random.shuffle(train_labels)
 
 # Vectorizing Data and Labels
 # TODO: Change one hot encoding for word embedding
+# TODO: modelWordsNumber from current longest sequence
 x_train = vectorize_sequences(train_data, modelWordsNumber)
 y_train = np.asarray(train_labels).astype('float32')
 
