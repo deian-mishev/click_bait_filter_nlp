@@ -1,9 +1,20 @@
 import tensorflowjs as tfjs
 from keras import callbacks
+from shutil import copyfile
 import json
 import os
+import random
 import numpy as np
 
+def split_data(SOURCE, TRAINING, TESTING, SPLIT_SIZE):
+    files = os.listdir(SOURCE)
+    filesS = len(files)
+    random.sample(files, filesS)
+    a = int(filesS*SPLIT_SIZE);
+    for i in files[:a]:
+        copyfile(os.path.join(SOURCE, i), os.path.join(TRAINING, i))
+    for i in files[a:]:
+        copyfile(os.path.join(SOURCE, i), os.path.join(TESTING, i))
 
 def save_checkpoints(should_save=True):
     # Checkpoints setup

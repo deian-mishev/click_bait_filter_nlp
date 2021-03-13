@@ -39,7 +39,7 @@ class MyHttpRequestHandler(SimpleHTTPRequestHandler):
                     MONGODB_POSITIVE, domain, url)
                 in_negative = findLink(
                     MONGODB_NEGATIVE, domain, url)
-                if not in_positive and not in_negative and el['tf_score'] != 0:
+                if not in_positive and not in_negative and el['tf_score'] != 0 and '.bg' in url:
                     html = HTML_FOUND.format(
                         src=url, tf_score=el['tf_score'])
 
