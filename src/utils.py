@@ -1,6 +1,19 @@
-
+from tensorflow.keras.preprocessing.text import Tokenizer
 import numpy as np
 import json
+import csv
+
+
+def get_csv_data(filename):
+    images = []
+    labels = []
+    with open(filename) as training_file:
+        reader = csv.reader(training_file, delimiter=',')
+        next(reader, None)
+        for line in reader:
+            images.append(np.array_split(line[1:785], 28))
+            labels.append(line[0])
+    return np.array(images).astype('float'), np.array(labels).astype('float')
 
 
 def response_html():
@@ -21,6 +34,14 @@ def un_vectorize_sequences(sequences):
     return results
 
 
+def tokenise_data(pos, neg, dimension):
+    posSequence = [' '.join(i) for i in pos]
+    negSequence = [' '.join(i) for i in neg]
+    tokenizer = Tokenizer(num_words=dimension)
+    tokenizer.fit_on_texts(np.concatenate((posSequence, negSequence)))
+    return tokenizer.word_index, tokenizer.texts_to_sequences(posSequence), tokenizer.texts_to_sequences(negSequence)
+
+
 def vectorize_sequences(sequences, dimension):
     results = np.zeros((len(sequences), dimension))
     for i, sequence in enumerate(sequences):
@@ -28,12 +49,16 @@ def vectorize_sequences(sequences, dimension):
     return results
 
 
-def fillSet(unique, filename):
+def fetchData(filename):
     with open(filename) as json_file:
-        data = np.array(json.load(json_file))
-        temp = np.unique(np.concatenate(data))
-        unique = np.concatenate([temp, unique])
-        return data, np.unique(unique)
+        return np.array(json.load(json_file))
+
+
+def fillSet(unique, filename):
+    data = fetchData(filename)
+    temp = np.unique(np.concatenate(data))
+    unique = np.concatenate([temp, unique])
+    return data, np.unique(unique)
 
 
 def strToSetIndex(out_data_set, out_data):

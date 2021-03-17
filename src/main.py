@@ -1,4 +1,4 @@
-from utils import fillSet, strToSetIndex, vectorize_sequences
+from utils import fillSet, strToSetIndex, vectorize_sequences, tokenise_data, fetchData
 from model import save_model, teach_model_k_fold, teach_model_hold_out
 from validate import validated_rand, plot_hold_out_res, plot_k_fold_res
 from db import remove_db_duplicates
@@ -10,7 +10,7 @@ import subprocess
 import numpy as np
 import os
 
-modelWordsNumber = 5000
+modelWordsNumber = 500
 # REMOVING DB DUPLICATES
 remove_db_duplicates()
 
@@ -20,19 +20,25 @@ process = subprocess.run(
 process = subprocess.run(
     ['./get_data.sh', os.environ['MONGODB_NEGATIVE']], cwd=r'./../')
 
-# Fetching Data and indexes
-out_data_set = np.array([])
-out_data_positive_raw, out_data_set = fillSet(
-    out_data_set, '../data/click_bait_db.json')
-out_data_negative_raw, out_data_set = fillSet(
-    out_data_set, '../data/click_bait_db_negative.json')
-out_data_set = {out_data_set[i]: i + 1 for i in range(0, len(out_data_set))}
+# # Legacy Fetching Data and indexes
+# out_data_set = np.array([])
+# out_data_positive_raw, out_data_set = fillSet(
+#     out_data_set, '../data/click_bait_db.json')
+# out_data_negative_raw, out_data_set = fillSet(
+#     out_data_set, '../data/click_bait_db_negative.json')
+# out_data_set = {out_data_set[i]: i + 1 for i in range(0, len(out_data_set))}
 
-# To indexes
-out_data_positive = strToSetIndex(
-    out_data_set, out_data_positive_raw)
-out_data_negative = strToSetIndex(
-    out_data_set, out_data_negative_raw)
+# # To indexes
+# out_data_positive = strToSetIndex(
+#     out_data_set, out_data_positive_raw)
+# out_data_negative = strToSetIndex(
+#     out_data_set, out_data_negative_raw)
+
+out_data_positive_raw = fetchData('../data/click_bait_db.json')
+out_data_negative_raw = fetchData('../data/click_bait_db_negative.json')
+out_data_set, out_data_positive, out_data_negative = tokenise_data(
+    out_data_positive_raw, out_data_negative_raw,
+    modelWordsNumber)
 
 # Removing doubles ... happens
 for i, A in np.ndenumerate(out_data_positive):
