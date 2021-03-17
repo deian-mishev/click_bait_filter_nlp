@@ -1,4 +1,5 @@
 from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 import numpy as np
 import json
 import csv
@@ -37,7 +38,7 @@ def un_vectorize_sequences(sequences):
 def tokenise_data(pos, neg, dimension):
     posSequence = [' '.join(i) for i in pos]
     negSequence = [' '.join(i) for i in neg]
-    tokenizer = Tokenizer(num_words=dimension)
+    tokenizer = Tokenizer(num_words=dimension, oov_token="@@@")
     tokenizer.fit_on_texts(np.concatenate((posSequence, negSequence)))
     return tokenizer.word_index, tokenizer.texts_to_sequences(posSequence), tokenizer.texts_to_sequences(negSequence)
 
@@ -47,6 +48,10 @@ def vectorize_sequences(sequences, dimension):
     for i, sequence in enumerate(sequences):
         results[i, sequence] = 1.
     return results
+
+
+def pad_sequence(sequences):
+    return pad_sequences(sequences, padding='post')
 
 
 def fetchData(filename):

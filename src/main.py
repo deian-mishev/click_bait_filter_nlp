@@ -1,4 +1,4 @@
-from utils import fillSet, strToSetIndex, vectorize_sequences, tokenise_data, fetchData
+from utils import fillSet, strToSetIndex, vectorize_sequences, tokenise_data, fetchData, pad_sequence
 from model import save_model, teach_model_k_fold, teach_model_hold_out
 from validate import validated_rand, plot_hold_out_res, plot_k_fold_res
 from db import remove_db_duplicates
@@ -10,7 +10,7 @@ import subprocess
 import numpy as np
 import os
 
-modelWordsNumber = 500
+modelWordsNumber = 5000
 # REMOVING DB DUPLICATES
 remove_db_duplicates()
 
@@ -65,7 +65,9 @@ np.random.shuffle(train_labels)
 # TODO:On data gathering end
 # 1: Change one hot encoding for word embedding
 # 2: modelWordsNumber from current longest sequence
-x_train = vectorize_sequences(train_data, modelWordsNumber)
+# x_train = vectorize_sequences(train_data, modelWordsNumber)
+# tf padding results to max sent name and sequencing aka above fix
+x_train = pad_sequence(train_data)
 y_train = np.asarray(train_labels).astype('float32')
 
 aside = 10
