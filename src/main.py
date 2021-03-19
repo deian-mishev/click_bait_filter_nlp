@@ -11,14 +11,16 @@ import numpy as np
 import os
 
 modelWordsNumber = 5000
-# REMOVING DB DUPLICATES
-remove_db_duplicates()
+maxLength = 25
+embDim = 16
+# # REMOVING DB DUPLICATES
+# remove_db_duplicates()
 
-# Exporting data
-process = subprocess.run(
-    ['./get_data.sh', os.environ['MONGODB_POSITIVE']], cwd=r'./../')
-process = subprocess.run(
-    ['./get_data.sh', os.environ['MONGODB_NEGATIVE']], cwd=r'./../')
+# # Exporting data
+# process = subprocess.run(
+#     ['./get_data.sh', os.environ['MONGODB_POSITIVE']], cwd=r'./../')
+# process = subprocess.run(
+#     ['./get_data.sh', os.environ['MONGODB_NEGATIVE']], cwd=r'./../')
 
 # # Legacy Fetching Data and indexes
 # out_data_set = np.array([])
@@ -62,12 +64,9 @@ np.random.seed(seedInt)
 np.random.shuffle(train_labels)
 
 # Vectorizing Data and Labels
-# TODO:On data gathering end
-# 1: Change one hot encoding for word embedding
-# 2: modelWordsNumber from current longest sequence
 # x_train = vectorize_sequences(train_data, modelWordsNumber)
-# tf padding results to max sent name and sequencing aka above fix
-x_train = pad_sequence(train_data)
+# y_train = np.asarray(train_labels).astype('float32')
+x_train = pad_sequence(train_data, maxLength)
 y_train = np.asarray(train_labels).astype('float32')
 
 aside = 10
@@ -79,24 +78,25 @@ x_train = x_train[aside:]
 y_train = y_train[aside:]
 
 # Model
-model = models.Sequential()
-model.add(layers.Dense(16, kernel_regularizer=regularizers.l2(
-    0.001), activation='relu', input_shape=(modelWordsNumber,)))
-model.add(layers.Dropout(0.2))
-model.add(layers.Dense(
-    16, kernel_regularizer=regularizers.l2(0.001), activation='relu'))
-model.add(layers.Dropout(0.2))
-model.add(layers.Dense(1, activation='sigmoid'))
-model.compile(optimizer='rmsprop', loss='binary_crossentropy',
-              metrics=['acc'])
+model = models.Sequential([
+    layers.Embedding(modelWordsNumber, embDim, input_length=maxLength),
+    layers.Flatten(),
+    layers.Dense(16, kernel_regularizer=regularizers.l2(0.001), activation='relu'),
+    layers.Dropout(.2),
+    layers.Dense(16, kernel_regularizer=regularizers.l2(0.001), activation='relu'),
+    layers.Dropout(.2),
+    layers.Dense(1, activation='sigmoid')])
 
-history, model, score = teach_model_k_fold(
-    model, x_train, y_train, 4, 8, 32)
-plot_k_fold_res(history)
+model.compile(optimizer='adam', loss='binary_crossentropy',metrics=['acc'])
+model.summary()
 
-# history, model, score = teach_model_hold_out(
-#     model, x_train, y_train, 100, 8, 32)
-# plot_hold_out_res(history)
+# history, model, score = teach_model_k_fold(
+#     model, x_train, y_train, 4, 8, 32)
+# plot_k_fold_res(history)
+
+history, model, score = teach_model_hold_out(
+    model, x_train, y_train, 100, 8, 32)
+plot_hold_out_res(history)
 print(score)
 
 validated_rand(model, out_data_set, partial_x_train,
