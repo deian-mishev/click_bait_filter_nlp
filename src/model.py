@@ -3,18 +3,21 @@ from keras import callbacks
 from shutil import copyfile
 import json
 import os
+import io
 import random
 import numpy as np
+
 
 def split_data(SOURCE, TRAINING, TESTING, SPLIT_SIZE):
     files = os.listdir(SOURCE)
     filesS = len(files)
     random.sample(files, filesS)
-    a = int(filesS*SPLIT_SIZE);
+    a = int(filesS*SPLIT_SIZE)
     for i in files[:a]:
         copyfile(os.path.join(SOURCE, i), os.path.join(TRAINING, i))
     for i in files[a:]:
         copyfile(os.path.join(SOURCE, i), os.path.join(TESTING, i))
+
 
 def save_checkpoints(should_save=True):
     # Checkpoints setup
@@ -33,6 +36,19 @@ def save_model(model, out_data_set):
     tfjs.converters.save_keras_model(model, '../model')
     with open('../model/mapping.json', 'w') as fp:
         json.dump(out_data_set, fp, sort_keys=True, indent=4)
+
+
+def save_embeddings(model, reverse_word_index, vocab_size):
+    weights = model.layers[0].get_weights()[0]
+    out_v = io.open('../emb/vecs.tsv', 'w', encoding='utf-8')
+    out_m = io.open('../emb/meta.tsv', 'w', encoding='utf-8')
+    for word_num in range(1, vocab_size):
+        word = reverse_word_index[word_num]
+        embeddings = weights[word_num]
+        out_m.write(word + "\n")
+        out_v.write('\t'.join([str(x) for x in embeddings]) + "\n")
+    out_v.close()
+    out_m.close()
 
 
 def teach_model_k_fold(model, x_train, y_train, folds, epochs, batch_size, save_points=False):

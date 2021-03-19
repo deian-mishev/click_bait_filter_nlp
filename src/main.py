@@ -1,5 +1,5 @@
 from utils import fillSet, strToSetIndex, vectorize_sequences, tokenise_data, fetchData, pad_sequence
-from model import save_model, teach_model_k_fold, teach_model_hold_out
+from model import save_model, save_embeddings, teach_model_k_fold, teach_model_hold_out
 from validate import validated_rand, plot_hold_out_res, plot_k_fold_res
 from db import remove_db_duplicates
 
@@ -10,7 +10,7 @@ import subprocess
 import numpy as np
 import os
 
-modelWordsNumber = 5000
+dictSize = 5000
 maxLength = 25
 embDim = 16
 # # REMOVING DB DUPLICATES
@@ -40,7 +40,9 @@ out_data_positive_raw = fetchData('../data/click_bait_db.json')
 out_data_negative_raw = fetchData('../data/click_bait_db_negative.json')
 out_data_set, out_data_positive, out_data_negative = tokenise_data(
     out_data_positive_raw, out_data_negative_raw,
-    modelWordsNumber)
+    dictSize)
+reverse_word_index = dict([(value, key)
+                           for (key, value) in out_data_set.items()])
 
 # Removing doubles ... happens
 for i, A in np.ndenumerate(out_data_positive):
@@ -64,7 +66,7 @@ np.random.seed(seedInt)
 np.random.shuffle(train_labels)
 
 # Vectorizing Data and Labels
-# x_train = vectorize_sequences(train_data, modelWordsNumber)
+# x_train = vectorize_sequences(train_data, dictSize)
 # y_train = np.asarray(train_labels).astype('float32')
 x_train = pad_sequence(train_data, maxLength)
 y_train = np.asarray(train_labels).astype('float32')
@@ -79,26 +81,32 @@ y_train = y_train[aside:]
 
 # Model
 model = models.Sequential([
-    layers.Embedding(modelWordsNumber, embDim, input_length=maxLength),
+    layers.Embedding(dictSize, embDim, input_length=maxLength),
     layers.Flatten(),
-    layers.Dense(16, kernel_regularizer=regularizers.l2(0.001), activation='relu'),
-    layers.Dropout(.2),
-    layers.Dense(16, kernel_regularizer=regularizers.l2(0.001), activation='relu'),
-    layers.Dropout(.2),
+    layers.Dense(6, kernel_regularizer=regularizers.l2(
+        0.001), activation='relu'),
+    layers.Dropout(.1),
+    layers.Dense(16, kernel_regularizer=regularizers.l2(
+        0.001), activation='relu'),
+    layers.Dropout(.1),
     layers.Dense(1, activation='sigmoid')])
 
-model.compile(optimizer='adam', loss='binary_crossentropy',metrics=['acc'])
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
 model.summary()
 
-# history, model, score = teach_model_k_fold(
-#     model, x_train, y_train, 4, 8, 32)
-# plot_k_fold_res(history)
+history, model, score = teach_model_k_fold(
+    model, x_train, y_train, 4, 16, 32)
+plot_k_fold_res(history)
 
-history, model, score = teach_model_hold_out(
-    model, x_train, y_train, 100, 8, 32)
-plot_hold_out_res(history)
+# history, model, score = teach_model_hold_out(
+#     model, x_train, y_train, 100, 8, 32)
+# plot_hold_out_res(history)
 print(score)
 
-validated_rand(model, out_data_set, partial_x_train,
+validated_rand(model, reverse_word_index, partial_x_train,
                partial_y_train, train_data)
+
 save_model(model, out_data_set)
+
+# https://projector.tensorflow.org
+save_embeddings(model, reverse_word_index, dictSize)

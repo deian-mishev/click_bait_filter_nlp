@@ -2,9 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def validated_rand(model, out_data_set, valSet, train_labels, train_data):
-    reverse_word_index = dict(
-        [(value, key) for (key, value) in out_data_set.items()])
+def decode_input(reverse_word_index, sample):
+    return ' '.join([reverse_word_index.get(i, '?') for i in sample])
+
+
+def validated_rand(model, reverse_word_index, valSet, train_labels, train_data):
     fig, ax = plt.subplots()
 
     fig.patch.set_visible(False)
@@ -15,8 +17,7 @@ def validated_rand(model, out_data_set, valSet, train_labels, train_data):
     clust_data = np.empty((0, 3), int)
     times = len(train_labels)
     for i in range(times):
-        decoded_link = ' '.join([reverse_word_index.get(
-            i, '?') for i in train_data[i]])
+        decoded_link = decode_input(reverse_word_index, train_data[i])
 
         clust_data = np.concatenate((clust_data,
                                      [[
