@@ -86,6 +86,9 @@ model = models.Sequential([
     layers.Dense(24, kernel_regularizer=regularizers.l2(
         0.001), activation='relu'),
     layers.Dropout(.2),
+    layers.Dense(16, kernel_regularizer=regularizers.l2(
+        0.001), activation='relu'),
+    layers.Dropout(.2),
     layers.Dense(1, activation='sigmoid')])
 
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
