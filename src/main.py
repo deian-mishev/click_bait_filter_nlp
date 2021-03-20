@@ -1,6 +1,6 @@
 from utils import fillSet, strToSetIndex, vectorize_sequences, tokenise_data, fetchData, pad_sequence
 from model import save_model, save_embeddings, teach_model_k_fold, teach_model_hold_out
-from validate import validated_rand, plot_hold_out_res, plot_k_fold_res
+from validate import validated_rand, plot_res
 from db import remove_db_duplicates
 
 from keras import layers
@@ -82,11 +82,8 @@ y_train = y_train[aside:]
 # Model
 model = models.Sequential([
     layers.Embedding(dictSize, embDim, input_length=maxLength),
-    layers.Flatten(),
-    layers.Dense(6, kernel_regularizer=regularizers.l2(
-        0.001), activation='relu'),
-    layers.Dropout(.2),
-    layers.Dense(16, kernel_regularizer=regularizers.l2(
+    layers.GlobalAveragePooling1D(),
+    layers.Dense(24, kernel_regularizer=regularizers.l2(
         0.001), activation='relu'),
     layers.Dropout(.2),
     layers.Dense(1, activation='sigmoid')])
@@ -94,14 +91,12 @@ model = models.Sequential([
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
 model.summary()
 
-history, model, score = teach_model_k_fold(
-    model, x_train, y_train, 4, 12, 128)
-plot_k_fold_res(history)
+# history, model, score = teach_model_k_fold(
+#     model, x_train, y_train, 4, 24, 128)
+history, model, score = teach_model_hold_out(
+    model, x_train, y_train, 100, 24, 128)
 
-# history, model, score = teach_model_hold_out(
-#     model, x_train, y_train, 100, 24, 128)
-# plot_hold_out_res(history)
-
+plot_res(history)
 validated_rand(model, reverse_word_index, partial_x_train,
                partial_y_train, train_data)
 

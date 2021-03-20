@@ -52,11 +52,11 @@ def save_embeddings(model, reverse_word_index, vocab_size):
 
 
 def teach_model_k_fold(model, x_train, y_train, folds, epochs, batch_size, save_points=False):
-    all_acc_history = []
+    avg_history = None
     all_scores = []
     num_value_samples = len(x_train) // folds
     for i in range(folds):
-        print('processing fold #', i)
+        print('processing fold #', i + 1)
         val_data = x_train[i *
                            num_value_samples: (i + 1) * num_value_samples]
         val_targets = y_train[i *
@@ -76,15 +76,21 @@ def teach_model_k_fold(model, x_train, y_train, folds, epochs, batch_size, save_
                             callbacks=save_checkpoints(save_points),
                             verbose=1)
 
-        acc_history = history.history['loss']
-        all_acc_history.append(acc_history)
+        if not avg_history:
+            avg_history = history
+        else:
+            for key in history.history:
+                for epoch in range(epochs):
+                    avg_history.history[key][epoch] += history.history[key][epoch]
+
         val_mse, val_mae = model.evaluate(val_data, val_targets, verbose=0)
         all_scores.append(val_mae)
 
-    average_acc_history = [np.mean([x[i] for x in all_acc_history])
-                           for i in range(epochs)]
+    for key in avg_history.history:
+        avg_history.history[key] = [avg_history.history[key][i]/folds
+                                    for i in range(epochs)]
 
-    return average_acc_history, model, all_scores
+    return avg_history, model, all_scores
 
 
 def teach_model_hold_out(model, x_train, y_train, aside, epochs, batch_size, save_points=False):

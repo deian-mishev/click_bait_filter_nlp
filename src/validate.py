@@ -26,7 +26,6 @@ def validated_rand(model, reverse_word_index, valSet, train_labels, train_data):
                                          '{:.4f}'.format(model.predict(
                                              np.array([valSet[i]]))[0][0])
                                      ]]))
-
     the_table = ax.table(
         cellText=clust_data,
         colLabels=collabel,
@@ -37,14 +36,7 @@ def validated_rand(model, reverse_word_index, valSet, train_labels, train_data):
     plt.show()
 
 
-def plot_k_fold_res(history):
-    plt.plot(range(1, len(history) + 1), history)
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.show()
-
-
-def plot_hold_out_res(history, loss=True, training=True):
+def plot_res(history, loss=True, training=True):
     history_dict = history.history
 
     acc_values = history_dict['acc']
