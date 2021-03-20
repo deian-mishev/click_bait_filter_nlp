@@ -82,7 +82,10 @@ y_train = y_train[aside:]
 # Model
 model = models.Sequential([
     layers.Embedding(dictSize, embDim, input_length=maxLength),
+    layers.Conv1D(128, 5, activation='relu'),
     layers.GlobalAveragePooling1D(),
+    # layers.Bidirectional(layers.LSTM(64,  return_sequences=True)),
+    # layers.Bidirectional(layers.LSTM(32)),
     layers.Dense(24, kernel_regularizer=regularizers.l2(
         0.001), activation='relu'),
     layers.Dropout(.2),
