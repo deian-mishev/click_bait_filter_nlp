@@ -38,7 +38,7 @@ def un_vectorize_sequences(sequences):
 def tokenise_data(pos, neg, dimension):
     posSequence = [' '.join(i) for i in pos]
     negSequence = [' '.join(i) for i in neg]
-    tokenizer = Tokenizer(num_words=dimension, oov_token="@@@")
+    tokenizer = Tokenizer(num_words=dimension, oov_token="<errrrror>")
     tokenizer.fit_on_texts(np.concatenate((posSequence, negSequence)))
     return tokenizer.word_index, tokenizer.texts_to_sequences(posSequence), tokenizer.texts_to_sequences(negSequence)
 
@@ -56,7 +56,7 @@ def pad_sequence(sequences, max_length):
 
 def fetchData(filename):
     with open(filename) as json_file:
-        return np.array(json.load(json_file))
+        return np.array(json.load(json_file), dtype="object")
 
 
 def fillSet(unique, filename):

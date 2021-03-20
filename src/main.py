@@ -10,19 +10,19 @@ import subprocess
 import numpy as np
 import os
 
-dictSize = 5000
+dictSize = 2000
 maxLength = 25
 embDim = 16
-# # REMOVING DB DUPLICATES
-# remove_db_duplicates()
+# REMOVING DB DUPLICATES
+remove_db_duplicates()
 
-# # Exporting data
-# process = subprocess.run(
-#     ['./get_data.sh', os.environ['MONGODB_POSITIVE']], cwd=r'./../')
-# process = subprocess.run(
-#     ['./get_data.sh', os.environ['MONGODB_NEGATIVE']], cwd=r'./../')
+# Exporting data
+process = subprocess.run(
+    ['./get_data.sh', os.environ['MONGODB_POSITIVE']], cwd=r'./../')
+process = subprocess.run(
+    ['./get_data.sh', os.environ['MONGODB_NEGATIVE']], cwd=r'./../')
 
-# # Legacy Fetching Data and indexes
+# # Legacy Fetching Data
 # out_data_set = np.array([])
 # out_data_positive_raw, out_data_set = fillSet(
 #     out_data_set, '../data/click_bait_db.json')
@@ -30,7 +30,7 @@ embDim = 16
 #     out_data_set, '../data/click_bait_db_negative.json')
 # out_data_set = {out_data_set[i]: i + 1 for i in range(0, len(out_data_set))}
 
-# # To indexes
+# # Legacy To indexes
 # out_data_positive = strToSetIndex(
 #     out_data_set, out_data_positive_raw)
 # out_data_negative = strToSetIndex(
@@ -85,28 +85,27 @@ model = models.Sequential([
     layers.Flatten(),
     layers.Dense(6, kernel_regularizer=regularizers.l2(
         0.001), activation='relu'),
-    layers.Dropout(.1),
+    layers.Dropout(.2),
     layers.Dense(16, kernel_regularizer=regularizers.l2(
         0.001), activation='relu'),
-    layers.Dropout(.1),
+    layers.Dropout(.2),
     layers.Dense(1, activation='sigmoid')])
 
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
 model.summary()
 
 history, model, score = teach_model_k_fold(
-    model, x_train, y_train, 4, 16, 32)
+    model, x_train, y_train, 4, 12, 128)
 plot_k_fold_res(history)
 
 # history, model, score = teach_model_hold_out(
-#     model, x_train, y_train, 100, 8, 32)
+#     model, x_train, y_train, 100, 24, 128)
 # plot_hold_out_res(history)
-print(score)
 
 validated_rand(model, reverse_word_index, partial_x_train,
                partial_y_train, train_data)
 
 save_model(model, out_data_set)
-
-# https://projector.tensorflow.org
+# https://projector.tensorflow.org - fing score
 save_embeddings(model, reverse_word_index, dictSize)
+print(score)
