@@ -11,8 +11,14 @@ import numpy as np
 import os
 
 dictSize = 3400
-maxLength = 20
-embDim = 32
+maxLength = 25
+embDim = 64
+batchSize = 80
+epochs = 24
+folds = 4
+holdout = 100
+plottingValSize = 10
+
 # # REMOVING DB DUPLICATES
 # remove_db_duplicates()
 
@@ -71,13 +77,12 @@ np.random.shuffle(train_labels)
 x_train = pad_sequence(train_data, maxLength)
 y_train = np.asarray(train_labels).astype('float32')
 
-aside = 10
-partial_x_train = x_train[:aside]
-partial_y_train = y_train[:aside]
-train_data = train_data[:aside]
+partial_x_train = x_train[:plottingValSize]
+partial_y_train = y_train[:plottingValSize]
+train_data = train_data[:plottingValSize]
 
-x_train = x_train[aside:]
-y_train = y_train[aside:]
+x_train = x_train[plottingValSize:]
+y_train = y_train[plottingValSize:]
 
 # Model
 model = models.Sequential([
@@ -95,9 +100,9 @@ model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
 model.summary()
 
 history, model, score = teach_model_k_fold(
-    model, x_train, y_train, 4, 24, 60)
-# history, model, score = teach_model_hold_out(
-#     model, x_train, y_train, 100, 24, 128)
+    model, x_train, y_train, folds, epochs, batchSize)
+history, model, score = teach_model_hold_out(
+    model, x_train, y_train, holdout, epochs, batchSize)
 
 plot_res(history)
 validated_rand(model, reverse_word_index, partial_x_train,
