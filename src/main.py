@@ -10,17 +10,17 @@ import subprocess
 import numpy as np
 import os
 
-dictSize = 2000
-maxLength = 25
-embDim = 16
-# REMOVING DB DUPLICATES
-remove_db_duplicates()
+dictSize = 3400
+maxLength = 20
+embDim = 32
+# # REMOVING DB DUPLICATES
+# remove_db_duplicates()
 
-# Exporting data
-process = subprocess.run(
-    ['./get_data.sh', os.environ['MONGODB_POSITIVE']], cwd=r'./../')
-process = subprocess.run(
-    ['./get_data.sh', os.environ['MONGODB_NEGATIVE']], cwd=r'./../')
+# # Exporting data
+# process = subprocess.run(
+#     ['./get_data.sh', os.environ['MONGODB_POSITIVE']], cwd=r'./../')
+# process = subprocess.run(
+#     ['./get_data.sh', os.environ['MONGODB_NEGATIVE']], cwd=r'./../')
 
 # # Legacy Fetching Data
 # out_data_set = np.array([])
@@ -82,31 +82,28 @@ y_train = y_train[aside:]
 # Model
 model = models.Sequential([
     layers.Embedding(dictSize, embDim, input_length=maxLength),
-    layers.Conv1D(128, 5, activation='relu'),
-    layers.GlobalAveragePooling1D(),
-    # layers.Bidirectional(layers.LSTM(64,  return_sequences=True)),
-    # layers.Bidirectional(layers.LSTM(32)),
-    layers.Dense(24, kernel_regularizer=regularizers.l2(
+    layers.Bidirectional(layers.LSTM(64, return_sequences=True)),
+    layers.Bidirectional(layers.LSTM(32)),
+    layers.Dense(64, kernel_regularizer=regularizers.l2(
         0.001), activation='relu'),
     layers.Dropout(.2),
     layers.Dense(16, kernel_regularizer=regularizers.l2(
         0.001), activation='relu'),
-    layers.Dropout(.2),
     layers.Dense(1, activation='sigmoid')])
 
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
 model.summary()
 
-# history, model, score = teach_model_k_fold(
-#     model, x_train, y_train, 4, 24, 128)
-history, model, score = teach_model_hold_out(
-    model, x_train, y_train, 100, 24, 128)
+history, model, score = teach_model_k_fold(
+    model, x_train, y_train, 4, 24, 60)
+# history, model, score = teach_model_hold_out(
+#     model, x_train, y_train, 100, 24, 128)
 
 plot_res(history)
 validated_rand(model, reverse_word_index, partial_x_train,
                partial_y_train, train_data)
 
-save_model(model, out_data_set)
+# save_model(model, out_data_set)
 # https://projector.tensorflow.org - fing score
 save_embeddings(model, reverse_word_index, dictSize)
 print(score)
