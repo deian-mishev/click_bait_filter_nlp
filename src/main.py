@@ -10,19 +10,21 @@ import subprocess
 import numpy as np
 import os
 
+H5PY_DEFAULT_READONLY = 1
+
 dictSize = 3400
 maxLength = 25
-embDim = 64
-batchSize = 80
+embDim = 16
+batchSize = 60
 epochs = 24
 folds = 4
-holdout = 100
-plottingValSize = 10
+holdout = 200
+plottingValSize = 5
 
-# REMOVING DB DUPLICATES
+# # REMOVING DB DUPLICATES
 remove_db_duplicates()
 
-# Exporting data
+# # Exporting data
 process = subprocess.run(
     ['./get_data.sh', os.environ['MONGODB_POSITIVE']], cwd=r'./../')
 process = subprocess.run(
@@ -89,10 +91,10 @@ model = models.Sequential([
     layers.Embedding(dictSize, embDim, input_length=maxLength),
     layers.Bidirectional(layers.LSTM(64, return_sequences=True)),
     layers.Bidirectional(layers.LSTM(32)),
-    layers.Dense(64, kernel_regularizer=regularizers.l2(
+    layers.Dense(24, kernel_regularizer=regularizers.l2(
         0.001), activation='relu'),
-    layers.Dropout(.2),
-    layers.Dense(16, kernel_regularizer=regularizers.l2(
+    layers.Dropout(.1),
+    layers.Dense(6, kernel_regularizer=regularizers.l2(
         0.001), activation='relu'),
     layers.Dense(1, activation='sigmoid')])
 
