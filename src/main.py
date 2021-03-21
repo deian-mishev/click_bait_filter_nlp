@@ -19,14 +19,14 @@ folds = 4
 holdout = 100
 plottingValSize = 10
 
-# # REMOVING DB DUPLICATES
-# remove_db_duplicates()
+# REMOVING DB DUPLICATES
+remove_db_duplicates()
 
-# # Exporting data
-# process = subprocess.run(
-#     ['./get_data.sh', os.environ['MONGODB_POSITIVE']], cwd=r'./../')
-# process = subprocess.run(
-#     ['./get_data.sh', os.environ['MONGODB_NEGATIVE']], cwd=r'./../')
+# Exporting data
+process = subprocess.run(
+    ['./get_data.sh', os.environ['MONGODB_POSITIVE']], cwd=r'./../')
+process = subprocess.run(
+    ['./get_data.sh', os.environ['MONGODB_NEGATIVE']], cwd=r'./../')
 
 # # Legacy Fetching Data
 # out_data_set = np.array([])
@@ -101,14 +101,14 @@ model.summary()
 
 history, model, score = teach_model_k_fold(
     model, x_train, y_train, folds, epochs, batchSize)
-history, model, score = teach_model_hold_out(
-    model, x_train, y_train, holdout, epochs, batchSize)
+# history, model, score = teach_model_hold_out(
+#     model, x_train, y_train, holdout, epochs, batchSize)
 
 plot_res(history)
 validated_rand(model, reverse_word_index, partial_x_train,
                partial_y_train, train_data)
 
-# save_model(model, out_data_set)
+save_model(model, out_data_set)
 # https://projector.tensorflow.org - fing score
 save_embeddings(model, reverse_word_index, dictSize)
 print(score)
