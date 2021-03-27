@@ -1,11 +1,12 @@
 from utils import fillSet, strToSetIndex, vectorize_sequences, tokenise_data, fetchData, pad_sequence
-from model import save_model, save_embeddings, teach_model_k_fold, teach_model_hold_out
+from modelHandlers import save_model, save_embeddings, teach_model_k_fold, teach_model_hold_out
 from validate import validated_rand, plot_res
 from db import remove_db_duplicates
 
 from keras import layers
 from keras import models
 from keras import regularizers
+from keras import optimizers
 import subprocess
 import numpy as np
 import os
@@ -20,15 +21,21 @@ epochs = 24
 folds = 4
 holdout = 200
 plottingValSize = 5
+rebuild_data = False
+indicate_lr = False
+save_results = False
+lr_spike_scaler = .2
+lr_scale_init = 1e-2
 
-# # REMOVING DB DUPLICATES
-remove_db_duplicates()
+if rebuild_data:
+    # REMOVING DB DUPLICATES
+    remove_db_duplicates()
 
-# # Exporting data
-process = subprocess.run(
-    ['./get_data.sh', os.environ['MONGODB_POSITIVE']], cwd=r'./../')
-process = subprocess.run(
-    ['./get_data.sh', os.environ['MONGODB_NEGATIVE']], cwd=r'./../')
+    # Exporting data
+    process = subprocess.run(
+        ['./get_data.sh', os.environ['MONGODB_POSITIVE']], cwd=r'./../')
+    process = subprocess.run(
+        ['./get_data.sh', os.environ['MONGODB_NEGATIVE']], cwd=r'./../')
 
 # # Legacy Fetching Data
 # out_data_set = np.array([])
@@ -98,19 +105,25 @@ model = models.Sequential([
         0.001), activation='relu'),
     layers.Dense(1, activation='sigmoid')])
 
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
-model.summary()
+optimizers = optimizers.Adam(learning_rate=lr_scale_init)
 
+model.compile(optimizer=optimizers,
+              loss='binary_crossentropy', metrics=['acc'])
+
+model.summary()
 history, model, score = teach_model_k_fold(
-    model, x_train, y_train, folds, epochs, batchSize)
+    model, x_train, y_train, folds, epochs, batchSize,
+    lr_spike_scaler=lr_spike_scaler, lr_scale_init=lr_scale_init, indicate_lr=indicate_lr)
 # history, model, score = teach_model_hold_out(
-#     model, x_train, y_train, holdout, epochs, batchSize)
+#     model, x_train, y_train, holdout, epochs, batchSize,
+#     lr_spike_scaler=lr_spike_scaler, lr_scale_init=lr_scale_init, indicate_lr=indicate_lr)
 
 plot_res(history)
 validated_rand(model, reverse_word_index, partial_x_train,
                partial_y_train, train_data)
-
-save_model(model, out_data_set)
-# https://projector.tensorflow.org - fing score
-save_embeddings(model, reverse_word_index, dictSize)
 print(score)
+
+if not indicate_lr and save_results:
+    save_model(model, out_data_set)
+    save_embeddings(model, reverse_word_index, dictSize)
+    # https://projector.tensorflow.org - fing score

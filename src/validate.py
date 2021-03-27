@@ -35,6 +35,19 @@ def validated_rand(model, reverse_word_index, valSet, train_labels, train_data):
     the_table.set_fontsize(6)
     plt.show()
 
+def plot_learning_rate_spike(history, lr_spike_scaler, lr_scale_init):
+    loss = history.history['loss']
+    len_loss = len(loss)
+    lrs = lr_scale_init * (10 ** (np.arange(len_loss) * lr_spike_scaler))
+    plt.semilogx(lrs, loss)
+    plt.axis([lr_scale_init, lrs[-1], 0, 1])
+
+def plot_series(time, series, format="-", start=0, end=None):
+    plt.plot(time[start:end], series[start:end], format)
+    plt.xlabel("Time")
+    plt.ylabel("Value")
+    plt.grid(True)
+
 
 def plot_res(history, loss=True, training=True):
     history_dict = history.history
