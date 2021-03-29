@@ -3,10 +3,12 @@ from modelHandlers import save_model, save_embeddings, teach_model_k_fold, teach
 from validate import validated_rand, plot_res
 from db import remove_db_duplicates
 
+from keras.utils.vis_utils import plot_model
 from keras import layers
 from keras import models
 from keras import regularizers
 from keras import optimizers
+from keras import losses
 import subprocess
 import numpy as np
 import os
@@ -16,16 +18,16 @@ H5PY_DEFAULT_READONLY = 1
 dictSize = 3400
 maxLength = 25
 embDim = 16
-batchSize = 60
-epochs = 24
-folds = 4
+batchSize = 200
+epochs = 6
+folds = 6
 holdout = 200
-plottingValSize = 5
+plottingValSize = 10
 rebuild_data = False
-indicate_lr = False
 save_results = False
+indicate_lr = False
 lr_spike_scaler = .2
-lr_scale_init = 1e-2
+lr_scale_init = 1e-3
 
 if rebuild_data:
     # REMOVING DB DUPLICATES
@@ -100,10 +102,14 @@ model = models.Sequential([
     layers.Bidirectional(layers.LSTM(32)),
     layers.Dense(24, kernel_regularizer=regularizers.l2(
         0.001), activation='relu'),
-    layers.Dropout(.1),
+    layers.Dropout(.01),
     layers.Dense(6, kernel_regularizer=regularizers.l2(
         0.001), activation='relu'),
     layers.Dense(1, activation='sigmoid')])
+
+# apt-get install graphviz just pip not gona cut it
+plot_model(model, show_shapes=True, show_layer_names=True,
+           to_file='../data/model.png')
 
 optimizers = optimizers.Adam(learning_rate=lr_scale_init)
 
