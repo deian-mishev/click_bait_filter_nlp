@@ -44,8 +44,7 @@ For development the application should have the following structure:
  | +-- click_bait_filter_ml
  | +-- click_bait_filter_portal
 ```
-This is as the 'click_bait_filter_ml' uses the 'click_bait_filter_be' api's for filtering links. 'click_bait_filter_portal' is just static html which can preside anywhere. 
-'click_bait_filter_extension' is autonomous as well.
+This is as the 'click_bait_filter_ml' uses the 'click_bait_filter_be' api's for filtering links. 'click_bait_filter_portal' is just static html which can preside anywhere.
 
 ## Installation
 
