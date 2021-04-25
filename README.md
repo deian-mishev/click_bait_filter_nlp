@@ -165,4 +165,4 @@ Model Consider with:
 
   [MONGO CONNECTION STRING]: <https://docs.mongodb.com/manual/reference/connection-string>
 
-![alt text](https://github.com/LeadShuriken/click_bait_filter_ml/blob/main/model.png?raw=true)
+![alt text](https://github.com/LeadShuriken/click_bait_filter_ml/blob/develop/model.png?raw=true)
