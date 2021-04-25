@@ -158,3 +158,5 @@ Model Consider with:
   [CLICKBAIT-PORTAL]: <https://click-bait-filtering-plugin.com>
 
   [MONGO CONNECTION STRING]: <https://docs.mongodb.com/manual/reference/connection-string>
+
+![alt text](https://github.com/LeadShuriken/click_bait_filter_ml/blob/main/model.png?raw=true)

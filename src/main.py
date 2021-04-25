@@ -109,7 +109,7 @@ model = models.Sequential([
 
 # apt-get install graphviz just pip not gona cut it
 plot_model(model, show_shapes=True, show_layer_names=True,
-           to_file='../data/model.png')
+           to_file='../model.png')
 
 optimizers = optimizers.Adam(learning_rate=lr_scale_init)
 
