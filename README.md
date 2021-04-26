@@ -144,6 +144,9 @@ Model Consider with:
 - K-Fold Validation With Shuffeling
 - Mini Batcht Tests
 
+### REF
+
+![alt text](https://github.com/LeadShuriken/click_bait_filter_ml/blob/develop/model.png?raw=true)
 
   [PY-MONGO]: <https://github.com/mher/pymongo>
   [KERAS]: <https://github.com/keras-team/keras>
@@ -164,5 +167,3 @@ Model Consider with:
   [CLICKBAIT-PORTAL]: <https://click-bait-filtering-plugin.com>
 
   [MONGO CONNECTION STRING]: <https://docs.mongodb.com/manual/reference/connection-string>
-
-![alt text](https://github.com/LeadShuriken/click_bait_filter_ml/blob/develop/model.png?raw=true)
