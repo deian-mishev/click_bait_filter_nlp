@@ -36,7 +36,8 @@ def save_checkpoints_callback():
 
 
 def save_model(model, out_data_set):
-    tfjs.converters.save_keras_model(model, '../model')
+    model.save('../model/modeljava')
+    tfjs.converters.save_keras_model(model, '../model/modeljs')
     with open('../model/mapping.json', 'w') as fp:
         json.dump(out_data_set, fp, sort_keys=True, indent=4)
 
