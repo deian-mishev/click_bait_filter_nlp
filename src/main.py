@@ -24,10 +24,11 @@ folds = 6
 holdout = 200
 plottingValSize = 10
 rebuild_data = False
-save_results = True
+save_results = False
 indicate_lr = False
 lr_spike_scaler = .2
 lr_scale_init = 1e-3
+padding = 'post'
 
 if rebuild_data:
     # REMOVING DB DUPLICATES
@@ -85,7 +86,7 @@ np.random.shuffle(train_labels)
 # Vectorizing Data and Labels
 # x_train = vectorize_sequences(train_data, dictSize)
 # y_train = np.asarray(train_labels).astype('float32')
-x_train = pad_sequence(train_data, maxLength)
+x_train = pad_sequence(train_data, maxLength, padding)
 y_train = np.asarray(train_labels).astype('float32')
 
 partial_x_train = x_train[:plottingValSize]

@@ -50,8 +50,8 @@ def vectorize_sequences(sequences, dimension):
     return results
 
 
-def pad_sequence(sequences, max_length):
-    return pad_sequences(sequences, maxlen=max_length, padding='post')
+def pad_sequence(sequences, max_length, padding):
+    return pad_sequences(sequences, maxlen=max_length, padding=padding)
 
 
 def fetchData(filename):
