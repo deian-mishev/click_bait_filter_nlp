@@ -8,6 +8,7 @@ import os
 import io
 import random
 import numpy as np
+import datetime
 
 
 def split_file_data(source, training_dest, testing_dest, split_size):
@@ -64,20 +65,25 @@ def save_embeddings(model, reverse_word_index, vocab_size):
     out_m.close()
 
 
-def add_callbacks(save_points, indicate_lr, lr_spike_scaler, lr_scale_init):
-    callbacks = []
+def add_callbacks(save_points, indicate_lr, lr_spike_scaler, lr_scale_init, t_board):
+    callback = []
+    if t_board:
+        log_dir = '../logs/' + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        callback.append(callbacks.TensorBoard(
+            log_dir=log_dir, histogram_freq=1))
     if save_points:
-        callbacks.append(save_checkpoints_callback())
+        callback.append(save_checkpoints_callback())
     if indicate_lr:
-        callbacks.append(indicate_lr_callback(lr_scale_init, lr_spike_scaler))
-    return callbacks if len(callbacks) > 0 else None
+        callback.append(indicate_lr_callback(lr_scale_init, lr_spike_scaler))
+    return callback if len(callback) > 0 else None
 
 
 def teach_model_k_fold(model, x_train, y_train,
                        folds, epochs, batch_size,
                        save_points=False, indicate_lr=False,
                        lr_scale_init=None,
-                       lr_spike_scaler=None):
+                       lr_spike_scaler=None,
+                       t_board=False):
     avg_history = None
     all_scores = []
     num_value_samples = len(x_train) // folds
@@ -104,7 +110,7 @@ def teach_model_k_fold(model, x_train, y_train,
                             batch_size=batch_size,
                             validation_data=(val_data, val_targets),
                             callbacks=add_callbacks(
-                                save_points, indicate_lr, lr_spike_scaler, lr_scale_init),
+                                save_points, indicate_lr, lr_spike_scaler, lr_scale_init, t_board),
                             verbose=1)
 
         if not avg_history:
@@ -132,7 +138,8 @@ def teach_model_hold_out(model, x_train, y_train,
                          aside, epochs, batch_size,
                          save_points=False, indicate_lr=False,
                          lr_scale_init=None,
-                         lr_spike_scaler=None):
+                         lr_spike_scaler=None,
+                         t_board=False):
     partial_x_train = x_train[aside:]
     partial_y_train = y_train[aside:]
 
@@ -144,7 +151,7 @@ def teach_model_hold_out(model, x_train, y_train,
                         batch_size=batch_size,
                         validation_data=(x_val, y_val),
                         callbacks=add_callbacks(
-                            save_points, indicate_lr, lr_spike_scaler, lr_scale_init),
+                            save_points, indicate_lr, lr_spike_scaler, lr_scale_init, t_board),
                         verbose=1)
 
     if indicate_lr:

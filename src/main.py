@@ -9,6 +9,7 @@ from keras import models
 from keras import regularizers
 from keras import optimizers
 from keras import losses
+
 import subprocess
 import numpy as np
 import os
@@ -26,6 +27,7 @@ plottingValSize = 10
 rebuild_data = False
 save_results = False
 indicate_lr = False
+t_board_save = True
 lr_spike_scaler = .2
 lr_scale_init = 1e-3
 padding = 'post'
@@ -98,7 +100,7 @@ y_train = y_train[plottingValSize:]
 
 # Model
 model = models.Sequential([
-    layers.Embedding(dictSize, embDim, input_length=maxLength),
+    layers.Embedding(dictSize, embDim, input_length=maxLength, name='input'),
     layers.Bidirectional(layers.LSTM(64, return_sequences=True)),
     layers.Bidirectional(layers.LSTM(32)),
     layers.Dense(24, kernel_regularizer=regularizers.l2(
@@ -106,7 +108,7 @@ model = models.Sequential([
     layers.Dropout(.01),
     layers.Dense(6, kernel_regularizer=regularizers.l2(
         0.001), activation='relu'),
-    layers.Dense(1, activation='sigmoid')])
+    layers.Dense(1, activation='sigmoid', name='output')], name='click_bait_model')
 
 # apt-get install graphviz just pip not gona cut it
 plot_model(model, show_shapes=True, show_layer_names=True,
@@ -118,12 +120,13 @@ model.compile(optimizer=optimizers,
               loss='binary_crossentropy', metrics=['acc'])
 
 model.summary()
+
 history, model, score = teach_model_k_fold(
     model, x_train, y_train, folds, epochs, batchSize,
-    lr_spike_scaler=lr_spike_scaler, lr_scale_init=lr_scale_init, indicate_lr=indicate_lr)
+    lr_spike_scaler=lr_spike_scaler, lr_scale_init=lr_scale_init, indicate_lr=indicate_lr, t_board=t_board_save)
 # history, model, score = teach_model_hold_out(
 #     model, x_train, y_train, holdout, epochs, batchSize,
-#     lr_spike_scaler=lr_spike_scaler, lr_scale_init=lr_scale_init, indicate_lr=indicate_lr)
+#     lr_spike_scaler=lr_spike_scaler, lr_scale_init=lr_scale_init, indicate_lr=indicate_lr, t_board=t_board_save)
 
 plot_res(history)
 validated_rand(model, reverse_word_index, partial_x_train,
@@ -134,3 +137,4 @@ if not indicate_lr and save_results:
     save_model(model, out_data_set)
     save_embeddings(model, reverse_word_index, dictSize)
     # https://projector.tensorflow.org - fing score
+    # saved_model_cli show --dir ../model/modeljava/ --all

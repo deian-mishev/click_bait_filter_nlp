@@ -1,6 +1,7 @@
 ### Custom ###
 /emb/*
 /model/*
+/logs/*
 /data/*
 /checkpoints/*
 
