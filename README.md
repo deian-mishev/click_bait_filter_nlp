@@ -1,4 +1,4 @@
-# CLICKBAIT-FILTER-ML
+# CLICKBAIT-FILTER-NLP
 
 [![ClickBaitSite](https://click-bait-filtering-plugin.com/assets/images/icon-128-122x122.png)](https://click-bait-filtering-plugin.com/index.html)
 
@@ -48,7 +48,7 @@ This is as the 'click_bait_filter_ml' uses the 'click_bait_filter_be' api's for 
 
 ## Installation
 
-CLICKBAIT-FILTER-ML requires [Python](https://www.python.org) v3.6+ to run.
+CLICKBAIT-FILTER-NLP requires [Python](https://www.python.org) v3.6+ to run.
 
 To setup the python environments install `virtualenv` (venv) for the python and:
 
